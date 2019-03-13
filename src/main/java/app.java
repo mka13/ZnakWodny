@@ -50,21 +50,14 @@ public class app {
         DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
         PrintRequestAttributeSet listaAtrybutow = new HashPrintRequestAttributeSet();
         listaAtrybutow.add(Sides.ONE_SIDED);
-        PrintService[] listaDrukarek = PrintServiceLookup.lookupPrintServices(flavor, listaAtrybutow);
-        if (listaDrukarek.length == 0) {
-            throw new IllegalStateException("Nie wykryto drukarek");
-        }
-        for (int i = 0; i <listaDrukarek.length ; i++) {
-            if(listaDrukarek[i].getName().equals(PrintServiceLookup.lookupDefaultPrintService().getName())){
-                drukarkaDomyslna=listaDrukarek[i];
-            }
-        }
 
 
+
+        drukarkaDomyslna=PrintServiceLookup.lookupDefaultPrintService();
         FileInputStream pdfDoWydruku = new FileInputStream(args[1]);
         Doc pdfDoc = new SimpleDoc(pdfDoWydruku, DocFlavor.INPUT_STREAM.AUTOSENSE, null);
         DocPrintJob printJob = drukarkaDomyslna.createPrintJob();
-        printJob.print(pdfDoc, new HashPrintRequestAttributeSet());
+        printJob.print(pdfDoc, listaAtrybutow);
         pdfDoWydruku.close();
     }
 }
