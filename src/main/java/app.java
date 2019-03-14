@@ -46,26 +46,27 @@ public class app {
 
        // drukowanie
 
-        PrintService drukarkaDomyslna=null;
-        DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
+        // tworzenie listy ustawień dla wydruku
         PrintRequestAttributeSet listaAtrybutow = new HashPrintRequestAttributeSet();
-
-        PrintService[] listaDrukarek = PrintServiceLookup.lookupPrintServices(flavor, listaAtrybutow);
-        if (listaDrukarek.length == 0) {
-            throw new IllegalStateException("Nie wykryto drukarek");
-        }
-        for (int i = 0; i <listaDrukarek.length ; i++) {
-            if(listaDrukarek[i].getName().equals(args[3])){
-                drukarkaDomyslna=listaDrukarek[i];
-
-            }
-        }
-
+        // dodawanie do listy ustawienia dla drukowania jednostronnego
         listaAtrybutow.add(Sides.ONE_SIDED);
+        // odczyt wybranego pliku w formie tablicy bajtów
         FileInputStream pdfDoWydruku = new FileInputStream(args[1]);
+        // tworzenie obiektu typu DOC. Jego rolą jest opisanie dokumentu który ma zostać wydrukowany.
+        // Do inicjalizacji tego obiektu używa się implementacji interfejsu SimpleDoc. Ta implementacja
+        // ma konstruktor przyjmujący dwa argumenty: plik do wydruku (w naszym przypadku pdf) oraz
+        // klasę typu DocFlavor która ma określać jaki format danych ma być wydrukowany. Metoda InputStream
+        // wkskazuje na to ze przekazujemy strumien danych a AUTOSENSE umożliwia automatyczne rozpoznanie formatu
+        // (w naszym przypadku PDF). Trzeci argument jest opcjonalny, jest nim lista atrybutów wydruku ale ją
+        // przekazujemy później więc tutaj dałem null
         Doc pdfDoc = new SimpleDoc(pdfDoWydruku, DocFlavor.INPUT_STREAM.AUTOSENSE, null);
+        // JAVA wykrywa domyślną drukarkę
+        PrintService drukarkaDomyslna=PrintServiceLookup.lookupDefaultPrintService();
+        // inicjalizacja zlecenia do drukarki i wydruk za pomocą metody print. Pierwszym parametrem jest
+        // strumien danych który chcemy wyrdukować a drugim to ustawienia drukarki
         DocPrintJob printJob = drukarkaDomyslna.createPrintJob();
         printJob.print(pdfDoc, listaAtrybutow);
+        // zamknięcie strumienia danych
         pdfDoWydruku.close();
 
     }
