@@ -6,6 +6,7 @@ import com.itextpdf.text.pdf.*;
 import javax.print.*;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Chromaticity;
 import javax.print.attribute.standard.Sides;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,7 +37,7 @@ public class app {
             // łączymy utworzony wcześniej znak wodny ze stroną pdf. Tutaj można dokładnie ustawić nachylenie,
             // i pozycje tego znaku
 
-            ColumnText.showTextAligned(stronaPdf, Element.ALIGN_CENTER,znakWodny,580,500,90);
+            ColumnText.showTextAligned(stronaPdf, Element.ALIGN_CENTER,znakWodny,350,20,0);
             // zapis
             stronaPdf.restoreState();
         }
@@ -50,6 +51,8 @@ public class app {
         PrintRequestAttributeSet listaAtrybutow = new HashPrintRequestAttributeSet();
         // dodawanie do listy ustawienia dla drukowania jednostronnego
         listaAtrybutow.add(Sides.ONE_SIDED);
+        // kolor czarno-bialy
+        listaAtrybutow.add(Chromaticity.MONOCHROME);
         // odczyt wybranego pliku w formie tablicy bajtów
         FileInputStream pdfDoWydruku = new FileInputStream(args[1]);
         // tworzenie obiektu typu DOC. Jego rolą jest opisanie dokumentu który ma zostać wydrukowany.
