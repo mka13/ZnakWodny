@@ -30,7 +30,7 @@ public class app {
         //String [] arr = "caly doukment".split(",");
 
        // PdfStamper nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],args[3]);
-        if (!arr[0].equals("caly doukment")){
+        if (!arr[0].equals("caly dokument")){
 
 
         nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],arr);
@@ -61,7 +61,7 @@ public class app {
         for (int i = 1; i <=liczbaStron ; i++) {
             // za pomocą tego obiektu odwołujemy się do pojedyńczej strony pdf
             PdfContentByte stronaPdf = nowyPdf.getOverContent(i);
-
+                if(args.length==5){
                 Image image=Image.getInstance(args[4]);
                 //Image image=Image.getInstance("C:\\Users\\mike\\Documents\\etykieta.png");
 
@@ -69,7 +69,7 @@ public class app {
 
                 image.setAbsolutePosition(75,675);
                 image.scaleAbsolute(330,90);
-                nowyPdf.getOverContent(i).addImage(image);
+                nowyPdf.getOverContent(i).addImage(image);}
 
 
             // za[isujemy jej ustawienia poczatkowe
