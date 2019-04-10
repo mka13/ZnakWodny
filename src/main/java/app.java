@@ -10,41 +10,50 @@ import javax.print.attribute.standard.Chromaticity;
 
 import javax.print.attribute.standard.Sides;
 import java.io.*;
-import java.nio.charset.Charset;
+
+import java.util.ArrayList;
+
+import java.util.List;
 
 // wykonywalna klasa
 public class app {
-   static FileOutputStream fileOutputStream;
+
+
 
     public static void main(String[] args) throws IOException, DocumentException, PrintException {
         PdfStamper nowyPdf=null;
         int liczbaStron=0;
+        int polozenieZnakuWodnego=0;
 
         // wczytywanie oryginalnego dokumentu Pdf, args [0] oznacza tekstowy parametr nr 1. Jest to w naszym przypadku
         // sciezka do oryginalnego pliku Pdf. Ten parametr podajemy w kodzie VBA
        PdfReader oryginalnyPdf = new PdfReader(args[0]);
-        //PdfReader oryginalnyPdf = new PdfReader("C:\\Users\\mike\\Documents\\test6.pdf");
+        //PdfReader oryginalnyPdf = new PdfReader("C:\\Users\\mike\\Documents\\kwalifikacja.pdf");
         // tworzenie kopii oryginalnego Pdf, args [1] to scieżka gdzie ma się ten plik znajdować
-       // FileOutputStream linkNowegoPdf = new FileOutputStream(args[1]);
+        FileOutputStream linkNowegoPdf = new FileOutputStream(args[1]);
        String [] arr = args[3].split(",");
-        //String [] arr = "caly doukment".split(",");
-
+       // String [] arr = "1,3,9,15,100".split(",");
+        //fileOutputStream=new FileOutputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
        // PdfStamper nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],args[3]);
         if (!arr[0].equals("caly dokument")){
 
 
-        nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],arr);
+        //nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],arr);
+
+            oryginalnyPdf.selectPages(konwersjaArgumentowZVBA(arr,oryginalnyPdf.getNumberOfPages()));
+
          //nowyPdf = konwersjaPdf(oryginalnyPdf,"C:\\Users\\mike\\Documents\\xx2.pdf",arr);
-        liczbaStron=arr.length;
-        }else
-        {
-            fileOutputStream=new FileOutputStream(args[1]);
 
-            //fileOutputStream=new FileOutputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
 
-            nowyPdf=new PdfStamper(oryginalnyPdf,fileOutputStream);
-        liczbaStron=oryginalnyPdf.getNumberOfPages();
         }
+
+            //fileOutputStream=new FileOutputStream(args[1]);
+
+
+
+            nowyPdf=new PdfStamper(oryginalnyPdf,linkNowegoPdf);
+
+
 
         // ustawiamy jaki rodzaj czcionki i wielkosc ma miec znak wodny
         //Font czcionka = new Font(Font.FontFamily.TIMES_ROMAN,12);
@@ -58,18 +67,95 @@ public class app {
          //Phrase znakWodny = new Phrase("TEST",czcionka);
          //Phrase znakWodny = new Phrase("TEST",czcionka);
         // pętla, która przechodzi przez wszystkie strony dokumentu i umieszcza znak wodny
-        for (int i = 1; i <=liczbaStron ; i++) {
+        for (int i = 1; i <=oryginalnyPdf.getNumberOfPages() ; i++) {
             // za pomocą tego obiektu odwołujemy się do pojedyńczej strony pdf
             PdfContentByte stronaPdf = nowyPdf.getOverContent(i);
+            Rectangle rectangle=oryginalnyPdf.getPageSizeWithRotation(i);
+            float szerokoscStronyZRotacja=rectangle.getWidth();
+            float szerokoscStrony=nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth();
+
                 if(args.length==5){
-                Image image=Image.getInstance(args[4]);
-                //Image image=Image.getInstance("C:\\Users\\mike\\Documents\\etykieta.png");
+
+            Image image=Image.getInstance(args[4]);
+                        image.scaleAbsolute(330,90);
+
+
+                    if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
+                        if(szerokoscStronyZRotacja==szerokoscStrony) {
+                        image.setAbsolutePosition(180, 453);
+                        polozenieZnakuWodnego=400;}
+                        else{
+                            image.setAbsolutePosition(79, 683);
+                            polozenieZnakuWodnego=270;
+                        }
+
+
+                    }else{
+                        if(szerokoscStronyZRotacja==szerokoscStrony){
+                        image.setAbsolutePosition(79, 683);
+                        polozenieZnakuWodnego=270;}
+                        else{
+                            image.setAbsolutePosition(180, 453);
+                            polozenieZnakuWodnego=400;}
+
+                        }
+
+                    nowyPdf.getOverContent(i).addImage(image);}
+                    if(args.length==4){
+                        if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
+                            if(szerokoscStronyZRotacja==szerokoscStrony) {
+
+                                polozenieZnakuWodnego=400;}
+                            else{
+
+                                polozenieZnakuWodnego=270;
+                            }
+
+
+                        }else{
+                            if(szerokoscStronyZRotacja==szerokoscStrony){
+
+                                polozenieZnakuWodnego=270;}
+                            else{
+
+                                polozenieZnakuWodnego=400;}
+
+                        }
+                    }
+
+
+//            image.scaleAbsolute(330,90);
+//                        if(arr[0].equals("caly dokument")) {
+//                            if (nowyPdf.getImportedPage(oryginalnyPdf, i).getWidth() > 700) {
+//                                image.setAbsolutePosition(170, 450);
+//                                polozenieZnakuWodnego=400;
+//                            } else {
+//                                image.setAbsolutePosition(75, 675);
+//                                polozenieZnakuWodnego=150;
+//                            }
+//                        }else{
+//
+//                            if(nowyPdf.getImportedPage(oryginalnyPdf, Integer.parseInt(arr[i-1])).getWidth()>700){
+//
+//                                image.setAbsolutePosition(170, 450);
+//                                polozenieZnakuWodnego=400;
+//
+//                            }else{
+//                                image.setAbsolutePosition(75, 675);
+//                                polozenieZnakuWodnego=150;
+//
+//                            }
+//
+//
+//
+//
+//                        }
+
+                //Image image=Image.getInstance(args[4]);
 
 
 
-                image.setAbsolutePosition(75,675);
-                image.scaleAbsolute(330,90);
-                nowyPdf.getOverContent(i).addImage(image);}
+                //}
 
 
             // za[isujemy jej ustawienia poczatkowe
@@ -82,7 +168,7 @@ public class app {
             // łączymy utworzony wcześniej znak wodny ze stroną pdf. Tutaj można dokładnie ustawić nachylenie,
             // i pozycje tego znaku
 
-            ColumnText.showTextAligned(stronaPdf, Element.ALIGN_CENTER,znakWodny,50,15,0);
+            ColumnText.showTextAligned(stronaPdf, Element.ALIGN_CENTER,znakWodny,polozenieZnakuWodnego,15,0);
             // zapis
             stronaPdf.restoreState();
         }
@@ -90,10 +176,9 @@ public class app {
 
         oryginalnyPdf.close();
         nowyPdf.close();
-        fileOutputStream.close();
-        File temp=new File(args[1].substring(0, args[1].length() - 4).concat("temp.pdf"));
-        //File temp=new File("C:\\Users\\mike\\Documents\\xx2.pdf".substring(0, "C:\\Users\\mike\\Documents\\xx2.pdf".length() - 4).concat("temp.pdf"));
-        temp.delete();
+        linkNowegoPdf.close();
+
+
        // drukowanie
 
         // tworzenie listy ustawień dla wydruku
@@ -126,34 +211,56 @@ public class app {
 
     }
 
-    private static PdfStamper konwersjaPdf(PdfReader oryginalnyPdf, String linkNowegoPdf, String [] arrList) throws DocumentException, IOException {
+//    private static PdfStamper konwersjaPdf(PdfReader oryginalnyPdf, String linkNowegoPdf, String [] arrList) throws DocumentException, IOException {
+//
+//
+//
+//        PdfImportedPage page;
+//            Document document = new Document(PageSize.A4);
+//
+//        String link = linkNowegoPdf.substring(0, linkNowegoPdf.length() - 4).concat("temp.pdf");
+//         fileOutputStream=new FileOutputStream(link);
+//        PdfWriter writer=PdfWriter.getInstance(document,fileOutputStream);
+//            document.open();
+//
+//        for (int i = 0; i <arrList.length ; i++) {
+//
+//
+//            page=writer.getImportedPage(oryginalnyPdf,Integer.parseInt(arrList[i]));
+//            System.out.println(page.getWidth());
+//
+//
+//            writer.getDirectContent().addTemplate(page,0,0);
+//
+//                document.newPage();
+//        }
+//        document.close();
+//        //writer.close();
+////        oryginalnyPdf.close();
+//        PdfReader reader=new PdfReader(link);
+//        fileOutputStream=new FileOutputStream(linkNowegoPdf);
+//
+//        PdfStamper stamper = new PdfStamper(reader, fileOutputStream);
+//        reader.close();
+//        //fileOutputStream.close();
+//
+//        return stamper;
+//    }
 
 
+    private static List<Integer> konwersjaArgumentowZVBA(String[] listaArgumentow, int numberOfPages){
 
-        PdfImportedPage page;
-            Document document = new Document(PageSize.A4);
+        List<Integer>bufor=new ArrayList<>();
+        for (int i = 0; i <listaArgumentow.length ; i++) {
 
-        String link = linkNowegoPdf.substring(0, linkNowegoPdf.length() - 4).concat("temp.pdf");
-         fileOutputStream=new FileOutputStream(link);
-        PdfWriter writer=PdfWriter.getInstance(document,fileOutputStream);
-            document.open();
-        for (int i = 0; i <arrList.length ; i++) {
+            if(Integer.parseInt(listaArgumentow[i])<=numberOfPages){
+                    bufor.add(Integer.parseInt(listaArgumentow[i]));
+            }
 
-            page=writer.getImportedPage(oryginalnyPdf,Integer.parseInt(arrList[i]));
-                writer.getDirectContent().addTemplate(page,0,0);
-                document.newPage();
         }
-        document.close();
-        //writer.close();
-//        oryginalnyPdf.close();
-        PdfReader reader=new PdfReader(link);
-        fileOutputStream=new FileOutputStream(linkNowegoPdf);
-
-        PdfStamper stamper = new PdfStamper(reader, fileOutputStream);
-        reader.close();
-        //fileOutputStream.close();
-
-        return stamper;
+        return bufor;
+        
     }
+
 
 }
