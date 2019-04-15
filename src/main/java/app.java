@@ -1,14 +1,18 @@
-
 // importowane klasy
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.printing.PDFPageable;
 
 import javax.print.*;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Chromaticity;
 
+import javax.print.attribute.standard.PageRanges;
 import javax.print.attribute.standard.Sides;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.*;
 
 import java.util.ArrayList;
@@ -20,38 +24,38 @@ public class app {
 
 
 
-    public static void main(String[] args) throws IOException, DocumentException, PrintException {
+    public static void main(String[] args) throws IOException, DocumentException, PrintException, PrinterException {
         PdfStamper nowyPdf=null;
         int liczbaStron=0;
         int polozenieZnakuWodnego=0;
 
         // wczytywanie oryginalnego dokumentu Pdf, args [0] oznacza tekstowy parametr nr 1. Jest to w naszym przypadku
         // sciezka do oryginalnego pliku Pdf. Ten parametr podajemy w kodzie VBA
-       PdfReader oryginalnyPdf = new PdfReader(args[0]);
-        //PdfReader oryginalnyPdf = new PdfReader("C:\\Users\\mike\\Documents\\kwalifikacja.pdf");
+        PdfReader oryginalnyPdf = new PdfReader(args[0]);
+        //PdfReader oryginalnyPdf = new PdfReader("C:\\Users\\mike\\Documents\\testMB.pdf");
         // tworzenie kopii oryginalnego Pdf, args [1] to scieżka gdzie ma się ten plik znajdować
         FileOutputStream linkNowegoPdf = new FileOutputStream(args[1]);
-       String [] arr = args[3].split(",");
-       // String [] arr = "1,3,9,15,100".split(",");
-        //fileOutputStream=new FileOutputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
-       // PdfStamper nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],args[3]);
+        String [] arr = args[3].split(",");
+        //String [] arr = "1,3,9,15,100".split(",");
+       // FileOutputStream linkNowegoPdf=new FileOutputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
+        // PdfStamper nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],args[3]);
         if (!arr[0].equals("caly dokument")){
 
 
-        //nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],arr);
+            //nowyPdf = konwersjaPdf(oryginalnyPdf,args[1],arr);
 
             oryginalnyPdf.selectPages(konwersjaArgumentowZVBA(arr,oryginalnyPdf.getNumberOfPages()));
 
-         //nowyPdf = konwersjaPdf(oryginalnyPdf,"C:\\Users\\mike\\Documents\\xx2.pdf",arr);
+            //nowyPdf = konwersjaPdf(oryginalnyPdf,"C:\\Users\\mike\\Documents\\xx2.pdf",arr);
 
 
         }
 
-            //fileOutputStream=new FileOutputStream(args[1]);
+        //fileOutputStream=new FileOutputStream(args[1]);
 
 
 
-            nowyPdf=new PdfStamper(oryginalnyPdf,linkNowegoPdf);
+        nowyPdf=new PdfStamper(oryginalnyPdf,linkNowegoPdf);
 
 
 
@@ -64,8 +68,8 @@ public class app {
         //BufferedReader bufferedReader=new BufferedReader(inputStreamReader);
         //String tekstZArgumentu = bufferedReader.readLine();
         Phrase znakWodny = new Phrase(args[2],czcionka);
-         //Phrase znakWodny = new Phrase("TEST",czcionka);
-         //Phrase znakWodny = new Phrase("TEST",czcionka);
+        //Phrase znakWodny = new Phrase("TEST",czcionka);
+        //Phrase znakWodny = new Phrase("TEST",czcionka);
         // pętla, która przechodzi przez wszystkie strony dokumentu i umieszcza znak wodny
         for (int i = 1; i <=oryginalnyPdf.getNumberOfPages() ; i++) {
             // za pomocą tego obiektu odwołujemy się do pojedyńczej strony pdf
@@ -74,54 +78,59 @@ public class app {
             float szerokoscStronyZRotacja=rectangle.getWidth();
             float szerokoscStrony=nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth();
 
-                if(args.length==5){
+            if(args.length>4){
 
-            Image image=Image.getInstance(args[4]);
-                        image.scaleAbsolute(330,90);
+                Image image=Image.getInstance(args[4]);
+                //Image image=Image.getInstance("C:\\Users\\mike\\Documents\\etykieta.png");
+
+                image.scaleAbsolute(330,90);
 
 
-                    if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
-                        if(szerokoscStronyZRotacja==szerokoscStrony) {
+                if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
+                    if(szerokoscStronyZRotacja==szerokoscStrony) {
                         image.setAbsolutePosition(180, 453);
                         polozenieZnakuWodnego=400;}
-                        else{
-                            image.setAbsolutePosition(79, 683);
-                            polozenieZnakuWodnego=270;
-                        }
+                    else{
 
 
-                    }else{
-                        if(szerokoscStronyZRotacja==szerokoscStrony){
+                        oryginalnyPdf.getPageN(i).put(PdfName.ROTATE,new PdfNumber(180));
+                        image.setAbsolutePosition(180, 453);
+                        polozenieZnakuWodnego=400;
+
+                    }
+
+
+                }else{
+                    if(szerokoscStronyZRotacja==szerokoscStrony){
                         image.setAbsolutePosition(79, 683);
                         polozenieZnakuWodnego=270;}
-                        else{
-                            image.setAbsolutePosition(180, 453);
-                            polozenieZnakuWodnego=400;}
+                    else{
+                        oryginalnyPdf.getPageN(i).put(PdfName.ROTATE,new PdfNumber(180));
+                        image.setAbsolutePosition(79, 683);
+                        polozenieZnakuWodnego=270;
 
-                        }
-
-                    nowyPdf.getOverContent(i).addImage(image);}
-                    if(args.length==4){
-                        if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
-                            if(szerokoscStronyZRotacja==szerokoscStrony) {
-
-                                polozenieZnakuWodnego=400;}
-                            else{
-
-                                polozenieZnakuWodnego=270;
-                            }
-
-
-                        }else{
-                            if(szerokoscStronyZRotacja==szerokoscStrony){
-
-                                polozenieZnakuWodnego=270;}
-                            else{
-
-                                polozenieZnakuWodnego=400;}
-
-                        }
                     }
+
+                }
+
+                nowyPdf.getOverContent(i).addImage(image);
+        }
+            if(args.length==4){
+                if(nowyPdf.getImportedPage(oryginalnyPdf,i).getWidth()>=nowyPdf.getImportedPage(oryginalnyPdf,i).getHeight()){
+                    if(szerokoscStronyZRotacja==szerokoscStrony) {
+
+                        polozenieZnakuWodnego=400;}
+
+
+
+                }else{
+                    if(szerokoscStronyZRotacja==szerokoscStrony){
+
+                        polozenieZnakuWodnego=270;}
+
+
+                }
+            }
 
 
 //            image.scaleAbsolute(330,90);
@@ -151,11 +160,11 @@ public class app {
 //
 //                        }
 
-                //Image image=Image.getInstance(args[4]);
+            //Image image=Image.getInstance(args[4]);
 
 
 
-                //}
+            //}
 
 
             // za[isujemy jej ustawienia poczatkowe
@@ -179,35 +188,55 @@ public class app {
         linkNowegoPdf.close();
 
 
-       // drukowanie
+        // drukowanie
 
-        // tworzenie listy ustawień dla wydruku
-        PrintRequestAttributeSet listaAtrybutow = new HashPrintRequestAttributeSet();
-        // dodawanie do listy ustawienia dla drukowania jednostronnego
-        listaAtrybutow.add(Sides.ONE_SIDED);
-        // kolor czarno-bialy
-        listaAtrybutow.add(Chromaticity.MONOCHROME);
 
-        // odczyt wybranego pliku w formie tablicy bajtów
-        FileInputStream pdfDoWydruku = new FileInputStream(args[1]);
-       // FileInputStream pdfDoWydruku = new FileInputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
-        // tworzenie obiektu typu DOC. Jego rolą jest opisanie dokumentu który ma zostać wydrukowany.
-        // Do inicjalizacji tego obiektu używa się implementacji interfejsu SimpleDoc. Ta implementacja
-        // ma konstruktor przyjmujący dwa argumenty: plik do wydruku (w naszym przypadku pdf) oraz
-        // klasę typu DocFlavor która ma określać jaki format danych ma być wydrukowany. Metoda InputStream
-        // wkskazuje na to ze przekazujemy strumien danych a AUTOSENSE umożliwia automatyczne rozpoznanie formatu
-        // (w naszym przypadku PDF). Trzeci argument jest opcjonalny, jest nim lista atrybutów wydruku ale ją
-        // przekazujemy później więc tutaj dałem null
-        Doc pdfDoc = new SimpleDoc(pdfDoWydruku, DocFlavor.INPUT_STREAM.AUTOSENSE, null);
+        PDDocument dokumentDoDruku = PDDocument.load(new File(args[1]));
+        //PDDocument dokumentDoDruku = PDDocument.load(new File("C:\\Users\\mike\\Documents\\WYnik.pdf"));
 
-        // JAVA wykrywa domyślną drukarkę
-        PrintService drukarkaDomyslna=PrintServiceLookup.lookupDefaultPrintService();
-        // inicjalizacja zlecenia do drukarki i wydruk za pomocą metody print. Pierwszym parametrem jest
-        // strumien danych który chcemy wyrdukować a drugim to ustawienia drukarki
-        DocPrintJob printJob = drukarkaDomyslna.createPrintJob();
-        printJob.print(pdfDoc, listaAtrybutow);
-        // zamknięcie strumienia danych
-        pdfDoWydruku.close();
+        PrinterJob printerJob = PrinterJob.getPrinterJob();
+        printerJob.setPageable((new PDFPageable(dokumentDoDruku)));
+        PrintRequestAttributeSet atr=new HashPrintRequestAttributeSet();
+        atr.add(Chromaticity.MONOCHROME);
+        atr.add(Sides.ONE_SIDED);
+           printerJob.print(atr);
+           dokumentDoDruku.close();
+
+
+
+
+
+
+
+
+
+//        // tworzenie listy ustawień dla wydruku
+//        PrintRequestAttributeSet listaAtrybutow = new HashPrintRequestAttributeSet();
+//        // dodawanie do listy ustawienia dla drukowania jednostronnego
+//        listaAtrybutow.add(Sides.ONE_SIDED);
+//        // kolor czarno-bialy
+//        listaAtrybutow.add(Chromaticity.MONOCHROME);
+//
+//        // odczyt wybranego pliku w formie tablicy bajtów
+//        FileInputStream pdfDoWydruku = new FileInputStream(args[1]);
+//        // FileInputStream pdfDoWydruku = new FileInputStream("C:\\Users\\mike\\Documents\\xx2.pdf");
+//        // tworzenie obiektu typu DOC. Jego rolą jest opisanie dokumentu który ma zostać wydrukowany.
+//        // Do inicjalizacji tego obiektu używa się implementacji interfejsu SimpleDoc. Ta implementacja
+//        // ma konstruktor przyjmujący dwa argumenty: plik do wydruku (w naszym przypadku pdf) oraz
+//        // klasę typu DocFlavor która ma określać jaki format danych ma być wydrukowany. Metoda InputStream
+//        // wkskazuje na to ze przekazujemy strumien danych a AUTOSENSE umożliwia automatyczne rozpoznanie formatu
+//        // (w naszym przypadku PDF). Trzeci argument jest opcjonalny, jest nim lista atrybutów wydruku ale ją
+//        // przekazujemy później więc tutaj dałem null
+//        Doc pdfDoc = new SimpleDoc(pdfDoWydruku, DocFlavor.INPUT_STREAM.AUTOSENSE, null);
+//
+//        // JAVA wykrywa domyślną drukarkę
+//        PrintService drukarkaDomyslna=PrintServiceLookup.lookupDefaultPrintService();
+//        // inicjalizacja zlecenia do drukarki i wydruk za pomocą metody print. Pierwszym parametrem jest
+//        // strumien danych który chcemy wyrdukować a drugim to ustawienia drukarki
+//        DocPrintJob printJob = drukarkaDomyslna.createPrintJob();
+//        printJob.print(pdfDoc, listaAtrybutow);
+//        // zamknięcie strumienia danych
+//        pdfDoWydruku.close();
 
     }
 
@@ -254,12 +283,12 @@ public class app {
         for (int i = 0; i <listaArgumentow.length ; i++) {
 
             if(Integer.parseInt(listaArgumentow[i])<=numberOfPages){
-                    bufor.add(Integer.parseInt(listaArgumentow[i]));
+                bufor.add(Integer.parseInt(listaArgumentow[i]));
             }
 
         }
         return bufor;
-        
+
     }
 
 
